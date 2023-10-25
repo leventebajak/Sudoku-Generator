@@ -1,10 +1,11 @@
-import Sudoku.Companion.toBoard
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import sudoku.SudokuSolver
+import sudoku.toBoard
 
 /**
- * Test for the [Sudoku] class.
+ * Test for the [SudokuSolver] class.
  */
-class SudokuTest {
+class SudokuSolverTest {
     @org.junit.jupiter.api.Test
     fun test() {
         val board = """
@@ -19,7 +20,9 @@ class SudokuTest {
             703018000
             """.toBoard()
 
-        val solution = Sudoku(board).solution
+        val solutions = SudokuSolver.findAllSolutionsFor(board)
+
+        assertEquals(1, solutions.size)
 
         val expectedSolution = """
             435269781
@@ -35,6 +38,6 @@ class SudokuTest {
 
         for (row in 0..8)
             for (col in 0..8)
-                assertEquals(expectedSolution[row][col], solution[row][col])
+                assertEquals(expectedSolution[row, col], solutions[0][row, col])
     }
 }

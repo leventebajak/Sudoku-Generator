@@ -1,4 +1,5 @@
-import org.junit.jupiter.api.Assertions.*
+import dlx.DLX
+import org.junit.jupiter.api.Assertions.assertEquals
 
 /**
  * Test for the [DLX] class.
@@ -14,7 +15,7 @@ class DLXTest {
                 1001000
                 0100001
                 0001101
-            """.trimIndent()
+            """
         )
         val dlx = DLX(matrix)
         val expectedSolution = Matrix(

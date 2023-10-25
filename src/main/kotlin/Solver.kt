@@ -3,11 +3,12 @@
  */
 interface Solver {
     /**
-     * Find the first solution and stop looking.
+     * Find N solutions and stop looking.
      *
-     * @return the first solution as a [Matrix], or `null` if no solution exists
+     * @param n the number of solutions to find
+     * @return a list of [n] solutions as [Matrices][Matrix]
      */
-    fun findFirstSolution(): Matrix?
+    fun findNSolutions(n: Int): List<Matrix>
 
     /**
      * Find all solutions.

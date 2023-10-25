@@ -1,4 +1,4 @@
-import java.util.*
+import java.util.BitSet
 
 /**
  * A matrix of binary values.
@@ -12,7 +12,7 @@ class Matrix {
         private set
 
     /**
-     * Creates a [Matrix] with the given number of columns and a list of [BitSet]s.
+     * Creates a [Matrix] with the given number of [columns] and a list of [BitSet]s.
      *
      * @param columns The number of columns in the matrix.
      * @param rows The rows of the matrix.
@@ -23,7 +23,7 @@ class Matrix {
     }
 
     /**
-     * Creates a [Matrix] by parsing a list of binary strings.
+     * Creates a [Matrix] by parsing a list of [binary strings][binaryStrings].
      *
      * @param binaryStrings A list of binary strings.
      * @see binaryStringToBitSet
@@ -40,7 +40,7 @@ class Matrix {
     }
 
     /**
-     * Creates a [Matrix] by parsing a multiline binary string.
+     * Creates a [Matrix] by parsing a [multiline binary string][binaryMultiline].
      * The string is trimmed and split into lines.
      *
      * @param binaryMultiline A multiline binary string.
@@ -51,11 +51,11 @@ class Matrix {
 
     companion object {
         /**
-         * Creates a [BitSet] from a binary string.
+         * Creates a [BitSet] from a [binary string][binaryString].
          *
          * @param binaryString A string of '0' and '1' characters.
-         * @return A [BitSet] with the same bits as the binary string.
-         * @throws IllegalArgumentException if the binary string contains characters other than '0' and '1'
+         * @return A [BitSet] with the same bits as the [binary string][binaryString].
+         * @throws IllegalArgumentException if the [binary string][binaryString] contains characters other than '0' and '1'
          */
         fun binaryStringToBitSet(binaryString: String): BitSet {
             val bitSet = BitSet(binaryString.length)
@@ -78,7 +78,6 @@ class Matrix {
             println()
         }
     }
-
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

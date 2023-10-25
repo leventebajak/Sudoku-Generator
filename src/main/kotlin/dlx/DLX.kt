@@ -1,3 +1,7 @@
+package dlx
+
+import Matrix
+import Solver
 import java.util.BitSet
 
 /**
@@ -8,13 +12,13 @@ import java.util.BitSet
  * by Hjalmar Laestander and Mattias Harrysson.
  *
  * @param matrix the [Matrix] representing the problem
- * @param clueRows the rows of the matrix that must be included in the solution
+ * @param clueRows the rows of the [Matrix] that must be included in the solution
  *
  * @property header the header of the internal structure (the root of the circular doubly-linked list)
  * @property columnHeaders the [Column] headers of the internal structure
  * @property clues the [Node]s that must be included in the solution
  */
-class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver {
+open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver {
     private val header = Column(-1)
     private val columnHeaders = Array(matrix.columns) { Column(it) }
     private val clues = mutableListOf<Node>()
@@ -66,30 +70,30 @@ class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver
     /**
      * Solving the problem using Algorithm X.
      *
-     * @param stopAfterFirstSolution whether to stop after finding the first solution
+     * @param stopAfter the maximum number of solutions to find before stopping
      * @return a list of solutions (each solution is a list of [Node]s)
      */
-    private fun solve(stopAfterFirstSolution: Boolean): List<List<Node>> {
+    private fun solve(stopAfter: Int): List<List<Node>> {
         // Cover the columns satisfied by the clues
         for (node in clues) {
-            cover(node.column!!)
+            node.column!!.cover()
             var i = node.right
             while (i != node) {
-                cover(i.column!!)
+                i.column!!.cover()
                 i = i.right
             }
         }
 
         // Search for solutions
         val solutions = mutableListOf<List<Node>>()
-        search(solutions, clues, stopAfterFirstSolution)
+        search(solutions, clues, stopAfter)
 
         // Uncover the columns satisfied by the clues
         for (node in clues) {
-            uncover(node.column!!)
+            node.column!!.uncover()
             var i = node.right
             while (i != node) {
-                uncover(i.column!!)
+                i.column!!.uncover()
                 i = i.right
             }
         }
@@ -102,13 +106,13 @@ class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver
      *
      * @param solutions a list of solutions (each solution is a list of [Node]s)
      * @param currentSolution the current solution being built
-     * @param stopAfterFirstSolution whether to stop after finding the first solution
+     * @param stopAfter the maximum number of solutions to find before stopping (use -1 for no limit)
      * @return whether a solution was found
      */
     private fun search(
         solutions: MutableList<List<Node>>,
         currentSolution: MutableList<Node>,
-        stopAfterFirstSolution: Boolean
+        stopAfter: Int
     ): Boolean {
         if (header.right as Column == header) {
             solutions.add(currentSolution.toList())
@@ -117,46 +121,39 @@ class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver
         val column = chooseMinColumn()
         if (column.size == 0)
             return false
-        cover(column)
+        column.cover()
         var r = column.down
         while (r != column) {
             currentSolution.add(r)
             var j = r.right
             while (j != r) {
-                cover(j.column!!)
+                j.column!!.cover()
                 j = j.right
             }
-            val solved = search(solutions, currentSolution, stopAfterFirstSolution)
-            if (solved && stopAfterFirstSolution)
+            val solved = search(solutions, currentSolution, stopAfter)
+            if (solved && stopAfter == solutions.size)
                 return true
             currentSolution.removeAt(currentSolution.lastIndex)
             j = r.left
             while (j != r) {
-                uncover(j.column!!)
+                j.column!!.uncover()
                 j = j.left
             }
             r = r.down
         }
-        uncover(column)
+        column.uncover()
         return false
     }
 
-    override fun findFirstSolution(): Matrix? {
-        val solutions = solve(true)
-        if (solutions.isEmpty())
-            return null
-        if (solutions.size > 1)
-            throw Exception("More than one solution found")
-        return solutionToMatrix(solutions[0])
-    }
+    override fun findNSolutions(n: Int) = solve(n).map { solutionToMatrix(it) }
 
-    override fun findAllSolutions() = solve(false).map { solutionToMatrix(it) }
+    override fun findAllSolutions() = findNSolutions(-1)
 
     /**
      * Converting a solution to a [Matrix].
      *
      * @param solution a list of [Node]s
-     * @return a [Matrix] representing the solution
+     * @return a [Matrix] representing the [solution]
      */
     private fun solutionToMatrix(solution: List<Node>): Matrix {
         val rows = mutableListOf<BitSet>()
@@ -192,53 +189,6 @@ class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver
             i = i.right as Column
         }
         return column
-    }
-
-    companion object {
-
-        /**
-         * Covering a column.
-         *
-         * @param column the [Column] to cover
-         */
-        fun cover(column: Column) {
-            column.right.left = column.left
-            column.left.right = column.right
-            column.column!!.size--
-            var i = column.down
-            while (i != column) {
-                var j = i.right
-                while (j != i) {
-                    j.down.up = j.up
-                    j.up.down = j.down
-                    j.column!!.size--
-                    j = j.right
-                }
-                i = i.down
-            }
-        }
-
-        /**
-         * Uncovering a column.
-         *
-         * @param column the [Column] to uncover
-         */
-        fun uncover(column: Column) {
-            var i = column.up
-            while (i != column) {
-                var j = i.left
-                while (j != i) {
-                    j.column!!.size++
-                    j.down.up = j
-                    j.up.down = j
-                    j = j.left
-                }
-                i = i.up
-            }
-            column.right.left = column
-            column.left.right = column
-            column.column!!.size++
-        }
     }
 
     override fun toString(): String {
