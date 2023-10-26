@@ -12,13 +12,13 @@ object SudokuSolver {
      * Gets all solutions to the [Board].
      *
      * @param board The [Board] to solve.
+     * @param limit The maximum number of solutions to find before stopping. Defaults to 1000.
      * @return A list of all solutions to the [board].
      */
-    fun findAllSolutionsFor(board: Board): List<Board> {
-        val maxSolutions = 1_000
-        val solutions = findNSolutionsFor(board, maxSolutions)
-        if (solutions.size == maxSolutions)
-            println("$maxSolutions solutions found, stopping")
+    fun findAllSolutionsFor(board: Board, limit: Int = 1_000): List<Board> {
+        val solutions = findNSolutionsFor(board, limit)
+        if (solutions.size == limit)
+            println("$limit solutions found, stopping")
         return solutions
     }
 
