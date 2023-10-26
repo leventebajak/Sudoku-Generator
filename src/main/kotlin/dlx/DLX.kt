@@ -68,12 +68,12 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
     }
 
     /**
-     * Solving the problem using Algorithm X.
+     * Starting the recursive search for solutions.
      *
      * @param stopAfter the maximum number of solutions to find before stopping
      * @return a list of solutions (each solution is a list of [Node]s)
      */
-    private fun solve(stopAfter: Int): List<List<Node>> {
+    private fun startSearch(stopAfter: Int): List<List<Node>> {
         // Cover the columns satisfied by the clues
         for (node in clues) {
             node.column!!.cover()
@@ -86,7 +86,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
 
         // Search for solutions
         val solutions = mutableListOf<List<Node>>()
-        search(solutions, clues, stopAfter)
+        recursiveSearch(solutions, clues, stopAfter)
 
         // Uncover the columns satisfied by the clues
         for (node in clues) {
@@ -107,20 +107,21 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
      * @param solutions a list of solutions (each solution is a list of [Node]s)
      * @param currentSolution the current solution being built
      * @param stopAfter the maximum number of solutions to find before stopping (use -1 for no limit)
-     * @return whether a solution was found
      */
-    private fun search(
+    private fun recursiveSearch(
         solutions: MutableList<List<Node>>,
         currentSolution: MutableList<Node>,
         stopAfter: Int
-    ): Boolean {
+    ) {
+        if (stopAfter == solutions.size)
+            return
         if (header.right as Column == header) {
             solutions.add(currentSolution.toList())
-            return true
+            return
         }
         val column = chooseMinColumn()
         if (column.size == 0)
-            return false
+            return
         column.cover()
         var r = column.down
         while (r != column) {
@@ -130,9 +131,9 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
                 j.column!!.cover()
                 j = j.right
             }
-            val solved = search(solutions, currentSolution, stopAfter)
-            if (solved && stopAfter == solutions.size)
-                return true
+            recursiveSearch(solutions, currentSolution, stopAfter)
+            if (stopAfter == solutions.size)
+                return
             currentSolution.removeAt(currentSolution.lastIndex)
             j = r.left
             while (j != r) {
@@ -142,10 +143,10 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
             r = r.down
         }
         column.uncover()
-        return false
+        return
     }
 
-    override fun findNSolutions(n: Int) = solve(n).map { solutionToMatrix(it) }
+    override fun findNSolutions(n: Int) = startSearch(n).map { solutionToMatrix(it) }
 
     override fun findAllSolutions() = findNSolutions(-1)
 
@@ -156,7 +157,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
      * @return a [Matrix] representing the [solution]
      */
     private fun solutionToMatrix(solution: List<Node>): Matrix {
-        val rows = mutableListOf<BitSet>()
+        val result = Matrix(columnHeaders.size, mutableListOf())
         for (node in solution) {
             val row = BitSet()
             row[node.column!!.id] = true
@@ -165,9 +166,9 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
                 row[j.column!!.id] = true
                 j = j.right
             }
-            rows.add(row)
+            result.rows.add(row)
         }
-        return Matrix(columnHeaders.size, rows)
+        return result
     }
 
     /**

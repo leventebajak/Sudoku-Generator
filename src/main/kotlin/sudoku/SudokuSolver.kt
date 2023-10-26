@@ -14,7 +14,13 @@ object SudokuSolver {
      * @param board The [Board] to solve.
      * @return A list of all solutions to the [board].
      */
-    fun findAllSolutionsFor(board: Board) = findNSolutionsFor(board, -1)
+    fun findAllSolutionsFor(board: Board): List<Board> {
+        val maxSolutions = 1_000
+        val solutions = findNSolutionsFor(board, maxSolutions)
+        if (solutions.size == maxSolutions)
+            println("$maxSolutions solutions found, stopping")
+        return solutions
+    }
 
     /**
      * Gets maximum [n] solutions to the [Board].
