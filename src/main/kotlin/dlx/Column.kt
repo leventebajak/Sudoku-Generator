@@ -4,13 +4,13 @@ package dlx
  * A [Node] that represents a column header in the circular doubly-linked list in [DLX].
  *
  * @property id The id of the column.
- * @property size The number of [Node]s in this column.
+ * @property size The number of [nodes][Node] in this column.
  */
 class Column(val id: Int) : Node() {
     var size: Int = 0
 
     /**
-     * Covering the [Column].
+     * Linking the left and right [nodes][Node] of the nodes in the [Column] to each other.
      */
     fun cover() {
         right.left = left
@@ -30,7 +30,7 @@ class Column(val id: Int) : Node() {
     }
 
     /**
-     * Uncovering the [Column].
+     * Linking the left and right [nodes][Node] of the nodes in the [Column] to the nodes themselves.
      */
     fun uncover() {
         var i = up

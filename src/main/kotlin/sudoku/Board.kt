@@ -11,9 +11,6 @@ import Matrix
  * @see Matrix.toBoard
  */
 data class Board(private val cells: Array<IntArray> = Array(9) { IntArray(9) }) {
-    /**
-     * Checks if the board is valid.
-     */
     init {
         if (cells.size != 9)
             throw IllegalArgumentException("Sudoku board must be 9x9")
@@ -95,26 +92,22 @@ data class Board(private val cells: Array<IntArray> = Array(9) { IntArray(9) }) 
 }
 
 /**
- * Converts a multiline string to a [Sudoku] board.
+ * Converts a multiline string to a sudoku [Board].
  *
  * @return A 9x9 array of numbers.
  */
 fun String.toBoard(): Board {
-    val lines = this.trimIndent().lines()
-    if (lines.size != 9)
-        throw IllegalArgumentException("Sudoku board must be 9x9")
-    return Board(lines.map { line ->
-        if (line.length != 9)
-            throw IllegalArgumentException("Sudoku board must be 9x9")
-        line.trim().map {
-            if (it in '0'..'9') it - '0'
-            else throw IllegalArgumentException("Illegal character in Sudoku board: \"$it\"")
-        }.toIntArray()
-    }.toTypedArray())
+    return Board(
+        this.trimIndent().lines().map { line ->
+            line.trim().map {
+                it - '0'
+            }.toIntArray()
+        }.toTypedArray()
+    )
 }
 
 /**
- * Converts the [Matrix] to a [Sudoku] board.
+ * Converts the [Matrix] to a sudoku [Board].
  *
  * @return A 9x9 array of numbers.
  */

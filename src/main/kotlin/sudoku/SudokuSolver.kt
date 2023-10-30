@@ -9,10 +9,10 @@ import java.util.BitSet
  */
 object SudokuSolver {
     /**
-     * Gets all solutions to the [Board].
+     * Gets all solutions to the [board].
      *
      * @param board The [Board] to solve.
-     * @param limit The maximum number of solutions to find before stopping. Defaults to 1000.
+     * @param limit The maximum number of solutions to find before stopping.
      * @return A list of all solutions to the [board].
      */
     fun findAllSolutionsFor(board: Board, limit: Int = 1_000): List<Board> {
@@ -23,24 +23,25 @@ object SudokuSolver {
     }
 
     /**
-     * Gets maximum [n] solutions to the [Board].
+     * Gets maximum [n] solutions to the [board].
      *
+     * @param board The [Board] to solve.
      * @param n The maximum number of solutions to find.
      * @return A list of maximum [n] solutions to the [board].
      */
     fun findNSolutionsFor(board: Board, n: Int): List<Board> {
-        val dlx = DLX(getMatrix(), getClueRows(board))
+        val dlx = DLX(getExactCoverMatrix(), getClueRows(board))
         val solutions = dlx.findNSolutions(n)
         return solutions.map { it.toBoard() }
     }
 
     /**
      * Gets the [Exact Cover Matrix](https://www.stolaf.edu/people/hansonr/sudoku/exactcovermatrix.htm)
-     * representation of the constraints of a Sudoku board.
+     * representation of the constraints of a Sudoku [Board].
      *
      * @return A [Matrix] representing the constraints of a Sudoku [Board].
      */
-    private fun getMatrix(): Matrix {
+    private fun getExactCoverMatrix(): Matrix {
         val matrix = Matrix(324, MutableList(729) { BitSet(324) })
 
         // Fill in the matrix with every possible combination
@@ -69,13 +70,12 @@ object SudokuSolver {
     }
 
     /**
-     * Gets the rows of the [Exact Cover Matrix](https://www.stolaf.edu/people/hansonr/sudoku/exactcovermatrix.htm)
-     * that are filled in. These are the clues of the Sudoku board.
+     * Gets the indices of the rows of the Exact Cover Matrix corresponding to the
+     * cells of the [board] are filled in, known as the clues.
      *
      * @param board The [Board] with the clues.
-     * @return A list of the filled in rows.
-     * @throws IllegalArgumentException If the [board] is invalid.
-     * @see getMatrix
+     * @return The indices of the rows of the Exact Cover Matrix corresponding to the clues in the [board].
+     * @see getExactCoverMatrix
      */
     private fun getClueRows(board: Board): MutableList<Int> {
         val clueRows = mutableListOf<Int>()

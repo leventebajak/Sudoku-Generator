@@ -16,7 +16,7 @@ import java.util.BitSet
  *
  * @property header the header of the internal structure (the root of the circular doubly-linked list)
  * @property columnHeaders the [Column] headers of the internal structure
- * @property clues the [Node]s that must be included in the solution
+ * @property clues the [nodes][Node] that must be included in the solution
  */
 open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver {
     private val header = Column(-1)
@@ -71,7 +71,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
      * Starting the recursive search for solutions.
      *
      * @param stopAfter the maximum number of solutions to find before stopping
-     * @return a list of solutions (each solution is a list of [Node]s)
+     * @return a list of solutions (each solution is a list of [nodes][Node])
      */
     private fun startSearch(stopAfter: Int): List<List<Node>> {
         // Cover the columns satisfied by the clues
@@ -104,7 +104,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
     /**
      * Searching for solutions recursively.
      *
-     * @param solutions a list of solutions (each solution is a list of [Node]s)
+     * @param solutions a list of solutions (each solution is a list of [nodes][Node])
      * @param currentSolution the current solution being built
      * @param stopAfter the maximum number of solutions to find before stopping (use -1 for no limit)
      */
@@ -153,7 +153,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
     /**
      * Converting a solution to a [Matrix].
      *
-     * @param solution a list of [Node]s
+     * @param solution a list of [nodes][Node]
      * @return a [Matrix] representing the [solution]
      */
     private fun solutionToMatrix(solution: List<Node>): Matrix {
@@ -172,9 +172,9 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
     }
 
     /**
-     * Choosing the [Column] with the minimum number of [Node]s to minimize the branching factor.
+     * Choosing the [Column] with the minimum number of [nodes][Node] to minimize the branching factor.
      *
-     * @return the [Column] with the minimum number of [Node]s
+     * @return the [Column] with the minimum number of [nodes][Node]
      */
     private fun chooseMinColumn(): Column {
         if (header.size == 0)

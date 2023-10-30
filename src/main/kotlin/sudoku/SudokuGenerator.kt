@@ -1,27 +1,25 @@
 package sudoku
 
 /**
- * Generates a Sudoku board with a given difficulty.
+ * Generates a [Sudoku] board with a unique solution.
  */
 object SudokuGenerator {
     /**
-     * The difficulty of a Sudoku board.
      * Determines how many clues are given.
      */
     enum class Difficulty { EASY, MEDIUM, HARD }
 
     /**
-     * Creates a Sudoku board with a given difficulty.
+     * Creates a Sudoku board with a given [difficulty].
      *
-     * @param difficulty The difficulty of the board.
-     * @throws IllegalArgumentException If the board is invalid or has zero or multiple solutions.
+     * @param difficulty The [Difficulty] of the board.
      * @return A [Sudoku] with the given [difficulty].
      */
     fun generate(difficulty: Difficulty): Sudoku {
         val clueCount = when (difficulty) {
-            Difficulty.EASY -> 35..45
-            Difficulty.MEDIUM -> 26..34
-            Difficulty.HARD -> 22..25
+            Difficulty.EASY -> 41..50
+            Difficulty.MEDIUM -> 31..40
+            Difficulty.HARD -> 26..30
         }.random()
 
         val clues = getFilledBoard()
@@ -59,7 +57,6 @@ object SudokuGenerator {
      * Gets a filled Sudoku [Board].
      *
      * @return A 9x9 array of numbers.
-     * @throws Exception If the board could not be generated.
      */
     private fun getFilledBoard(): Board {
         val board = Board()
@@ -74,9 +71,6 @@ object SudokuGenerator {
         }
 
         val solutions = SudokuSolver.findNSolutionsFor(board, 1)
-
-        if (solutions.size != 1)
-            throw Exception("Could not generate Sudoku board!")
 
         return solutions[0]
     }
