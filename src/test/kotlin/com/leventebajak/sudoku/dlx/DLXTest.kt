@@ -1,4 +1,6 @@
-import dlx.DLX
+package com.leventebajak.sudoku.dlx
+
+import com.leventebajak.sudoku.Matrix
 import org.junit.jupiter.api.Assertions.assertEquals
 
 /**

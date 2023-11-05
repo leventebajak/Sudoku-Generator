@@ -1,4 +1,4 @@
-package sudoku
+package com.leventebajak.sudoku
 
 /**
  * Generates a [Sudoku] board with a unique solution.

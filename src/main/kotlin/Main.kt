@@ -1,4 +1,4 @@
-import sudoku.*
+import com.leventebajak.sudoku.*
 
 fun main() {
     val sudoku = SudokuGenerator.generate(SudokuGenerator.Difficulty.EASY)

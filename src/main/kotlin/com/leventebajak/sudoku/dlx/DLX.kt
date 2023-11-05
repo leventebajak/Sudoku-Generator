@@ -1,7 +1,6 @@
-package dlx
+package com.leventebajak.sudoku.dlx
 
-import Matrix
-import Solver
+import com.leventebajak.sudoku.Matrix
 import java.util.BitSet
 
 /**
@@ -18,7 +17,7 @@ import java.util.BitSet
  * @property columnHeaders the [Column] headers of the internal structure
  * @property clues the [nodes][Node] that must be included in the solution
  */
-open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : Solver {
+open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
     private val header = Column(-1)
     private val columnHeaders = Array(matrix.columns) { Column(it) }
     private val clues = mutableListOf<Node>()
@@ -146,9 +145,9 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) : S
         return
     }
 
-    override fun findNSolutions(n: Int) = startSearch(n).map { solutionToMatrix(it) }
+    fun findNSolutions(n: Int) = startSearch(n).map { solutionToMatrix(it) }
 
-    override fun findAllSolutions() = findNSolutions(-1)
+    fun findAllSolutions() = findNSolutions(-1)
 
     /**
      * Converting a solution to a [Matrix].

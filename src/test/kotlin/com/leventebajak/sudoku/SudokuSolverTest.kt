@@ -1,6 +1,6 @@
+package com.leventebajak.sudoku
+
 import org.junit.jupiter.api.Assertions.assertEquals
-import sudoku.SudokuSolver
-import sudoku.toBoard
 
 /**
  * Test for the [SudokuSolver] class.

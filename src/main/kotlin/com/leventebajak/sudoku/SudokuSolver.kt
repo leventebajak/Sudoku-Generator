@@ -1,7 +1,6 @@
-package sudoku
+package com.leventebajak.sudoku
 
-import Matrix
-import dlx.DLX
+import com.leventebajak.sudoku.dlx.DLX
 import java.util.BitSet
 
 /**
@@ -36,7 +35,7 @@ object SudokuSolver {
     }
 
     /**
-     * Gets the [Exact Cover Matrix](https://www.stolaf.edu/people/hansonr/sudoku/exactcovermatrix.htm)
+     * Gets the [Exact Cover com.leventebajak.sudoku.Matrix](https://www.stolaf.edu/people/hansonr/sudoku/exactcovermatrix.htm)
      * representation of the constraints of a Sudoku [Board].
      *
      * @return A [Matrix] representing the constraints of a Sudoku [Board].
@@ -70,11 +69,11 @@ object SudokuSolver {
     }
 
     /**
-     * Gets the indices of the rows of the Exact Cover Matrix corresponding to the
+     * Gets the indices of the rows of the Exact Cover com.leventebajak.sudoku.Matrix corresponding to the
      * cells of the [board] are filled in, known as the clues.
      *
      * @param board The [Board] with the clues.
-     * @return The indices of the rows of the Exact Cover Matrix corresponding to the clues in the [board].
+     * @return The indices of the rows of the Exact Cover com.leventebajak.sudoku.Matrix corresponding to the clues in the [board].
      * @see getExactCoverMatrix
      */
     private fun getClueRows(board: Board): MutableList<Int> {
@@ -86,7 +85,5 @@ object SudokuSolver {
             clueRows.add(row * 81 + col * 9 + n - 1)
         }
         return clueRows
-
     }
-
 }

@@ -1,3 +1,5 @@
+package com.leventebajak.sudoku
+
 import java.util.BitSet
 
 /**

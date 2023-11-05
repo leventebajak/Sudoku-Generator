@@ -1,4 +1,4 @@
-package dlx
+package com.leventebajak.sudoku.dlx
 
 /**
  * The nodes of the circular doubly-linked list in [DLX].

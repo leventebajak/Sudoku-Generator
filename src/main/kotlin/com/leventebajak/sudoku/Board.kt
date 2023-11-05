@@ -1,6 +1,4 @@
-package sudoku
-
-import Matrix
+package com.leventebajak.sudoku
 
 /**
  * A 9x9 [Sudoku] board.
@@ -116,7 +114,7 @@ fun Matrix.toBoard(): Board {
     for (bitSet in this.rows) {
         val cellConstraint = bitSet.nextSetBit(0)
         if (cellConstraint == -1 || cellConstraint >= 81)
-            throw IllegalArgumentException("Matrix does not represent a Sudoku board")
+            throw IllegalArgumentException("com.leventebajak.sudoku.Matrix does not represent a Sudoku board")
 
         val row = cellConstraint / 9
         val col = cellConstraint % 9
@@ -125,7 +123,7 @@ fun Matrix.toBoard(): Board {
 
         val rowConstraint = bitSet.nextSetBit(81)
         if (rowConstraint == -1 || rowConstraint >= 162)
-            throw IllegalArgumentException("Matrix does not represent a Sudoku board")
+            throw IllegalArgumentException("com.leventebajak.sudoku.Matrix does not represent a Sudoku board")
 
         val number = rowConstraint - 81 - row * 9 + 1
 
