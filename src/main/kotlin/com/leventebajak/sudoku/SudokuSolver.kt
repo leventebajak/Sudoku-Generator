@@ -35,6 +35,18 @@ object SudokuSolver {
     }
 
     /**
+     * Gets a unique solution to the [board].
+     *
+     * @param board The [Board] to solve.
+     * @return A unique solution to the [board] if it exists, otherwise null.
+     */
+    fun findUniqueSolutionFor(board: Board): Board? {
+        val dlx = DLX(getExactCoverMatrix(), getClueRows(board))
+        val solutions = dlx.findNSolutions(2)
+        return if (solutions.size == 1) solutions[0].toBoard() else null
+    }
+
+    /**
      * Gets the [Exact Cover com.leventebajak.sudoku.Matrix](https://www.stolaf.edu/people/hansonr/sudoku/exactcovermatrix.htm)
      * representation of the constraints of a Sudoku [Board].
      *
@@ -80,7 +92,7 @@ object SudokuSolver {
         val clueRows = mutableListOf<Int>()
         for (row in 0..8) for (col in 0..8) {
             val n = board[row, col]
-            if (n == 0)
+            if (n == Board.EMPTY_CELL)
                 continue
             clueRows.add(row * 81 + col * 9 + n - 1)
         }

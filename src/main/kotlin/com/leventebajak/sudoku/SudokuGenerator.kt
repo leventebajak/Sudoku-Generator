@@ -7,7 +7,7 @@ object SudokuGenerator {
     /**
      * Determines how many clues are given.
      */
-    enum class Difficulty { EASY, MEDIUM, HARD }
+    enum class Difficulty { EASY, MEDIUM, HARD, VERY_HARD }
 
     /**
      * Creates a Sudoku board with a given [difficulty].
@@ -16,11 +16,13 @@ object SudokuGenerator {
      * @return A [Sudoku] with the given [difficulty].
      */
     fun generate(difficulty: Difficulty): Sudoku {
+        // The final number of clues is not guaranteed to be exact
         val clueCount = when (difficulty) {
-            Difficulty.EASY -> 41..50
-            Difficulty.MEDIUM -> 31..40
-            Difficulty.HARD -> 26..30
-        }.random()
+            Difficulty.EASY -> 45
+            Difficulty.MEDIUM -> 38
+            Difficulty.HARD -> 30
+            Difficulty.VERY_HARD -> 26
+        }
 
         val clues = getFilledBoard()
 
@@ -28,29 +30,39 @@ object SudokuGenerator {
         for (row in 0..8)
             for (col in 0..8)
                 remainingCells.add(Pair(row, col))
-        var removed = 0
+        var removedCount = 0
+
         var tries = 0
-        val maxTries = 25
-        while (removed < 81 - clueCount) {
+        val maxTries = 40
+
+        var solution: Board? = null
+
+        while (removedCount < 81 - clueCount) {
             val (row, col) = remainingCells.random()
-            val n = clues[row, col]
-            clues[row, col] = 0
+            val removedValue = clues[row, col]
+            clues[row, col] = Board.EMPTY_CELL
 
-            // Check if the board is still solvable
-            if (SudokuSolver.findAllSolutionsFor(clues).size > 1) {
-                clues[row, col] = n
+            solution = SudokuSolver.findUniqueSolutionFor(clues)
 
-                if (++tries == maxTries)
+            // If there is no unique solution, put the value back
+            if (solution == null) {
+                clues[row, col] = removedValue
+
+                // If we tried too many times, give up
+                if (++tries == maxTries) {
+                    solution = SudokuSolver.findUniqueSolutionFor(clues)
                     break
+                }
+
                 continue
             }
 
             remainingCells.remove(Pair(row, col))
-            removed++
+            removedCount++
             tries = 0
         }
 
-        return Sudoku(clues)
+        return Sudoku(clues, listOf(solution!!))
     }
 
     /**

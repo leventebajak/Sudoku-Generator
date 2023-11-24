@@ -9,6 +9,13 @@ package com.leventebajak.sudoku
  * @see Matrix.toBoard
  */
 data class Board(private val cells: Array<IntArray> = Array(9) { IntArray(9) }) {
+    companion object {
+        /**
+         * The value of an empty cell.
+         */
+        const val EMPTY_CELL = 0
+    }
+
     init {
         if (cells.size != 9)
             throw IllegalArgumentException("Sudoku board must be 9x9")
@@ -16,8 +23,8 @@ data class Board(private val cells: Array<IntArray> = Array(9) { IntArray(9) }) 
             if (cells[row].size != 9)
                 throw IllegalArgumentException("Sudoku board must be 9x9")
             for (col in 0..8) {
-                if (cells[row][col] !in 0..9)
-                    throw IllegalArgumentException("Cell value must be between 0 and 9")
+                if (cells[row][col] !in 1..9 && cells[row][col] != EMPTY_CELL)
+                    throw IllegalArgumentException("Cell value must be between 1 and 9 or be $EMPTY_CELL (empty)")
             }
         }
     }
@@ -70,8 +77,8 @@ data class Board(private val cells: Array<IntArray> = Array(9) { IntArray(9) }) 
      * @throws IllegalArgumentException If the value is not between 0 and 9.
      */
     operator fun set(row: Int, col: Int, value: Int) {
-        if (value !in 0..9)
-            throw IllegalArgumentException("Cell value must be between 0 and 9")
+        if (value !in 1..9 && value != EMPTY_CELL)
+            throw IllegalArgumentException("Cell value must be between 1 and 9 or be $EMPTY_CELL (empty)")
         cells[row][col] = value
     }
 
@@ -118,7 +125,7 @@ fun Matrix.toBoard(): Board {
 
         val row = cellConstraint / 9
         val col = cellConstraint % 9
-        if (board[row, col] != 0)
+        if (board[row, col] != Board.EMPTY_CELL)
             throw IllegalArgumentException("Multiple numbers in the same cell")
 
         val rowConstraint = bitSet.nextSetBit(81)
