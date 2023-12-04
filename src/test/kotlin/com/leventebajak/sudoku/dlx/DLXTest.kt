@@ -1,13 +1,13 @@
 package com.leventebajak.sudoku.dlx
 
-import com.leventebajak.sudoku.Matrix
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Test for the [DLX] class.
  */
 class DLXTest {
-    @org.junit.jupiter.api.Test
+    @Test
     fun test() {
         val matrix = Matrix(
             """

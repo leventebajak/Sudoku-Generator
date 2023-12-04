@@ -1,4 +1,4 @@
-package com.leventebajak.sudoku
+package com.leventebajak.sudoku.dlx
 
 import java.util.BitSet
 
@@ -8,21 +8,7 @@ import java.util.BitSet
  * @property columns The number of columns in the matrix.
  * @property rows The rows of the matrix as a list of [BitSet]s.
  */
-class Matrix {
-    val rows: MutableList<BitSet>
-    var columns: Int
-        private set
-
-    /**
-     * Creates a [Matrix] with the given number of [columns] and a list of [BitSet]s.
-     *
-     * @param columns The number of columns in the matrix.
-     * @param rows The rows of the matrix.
-     */
-    constructor(columns: Int, rows: List<BitSet>) {
-        this.columns = columns
-        this.rows = rows.toMutableList()
-    }
+class Matrix(val columns: Int, val rows: MutableList<BitSet>) {
 
     /**
      * Creates a [Matrix] by parsing a list of [binary strings][binaryStrings].
@@ -31,15 +17,15 @@ class Matrix {
      * @see binaryStringToBitSet
      * @throws IllegalArgumentException if the binary strings are not all the same length
      */
-    constructor(binaryStrings: List<String>) {
-        columns = binaryStrings[0].length
+    constructor(binaryStrings: List<String>) : this(
+        columns = binaryStrings[0].length,
         rows = MutableList(binaryStrings.size) {
             binaryStrings[it].trim()
-            if (binaryStrings[it].length != columns)
+            if (binaryStrings[it].length != binaryStrings[0].length)
                 throw IllegalArgumentException("All rows must have the same length")
             binaryStringToBitSet(binaryStrings[it])
         }
-    }
+    )
 
     /**
      * Creates a [Matrix] by parsing a [multiline binary string][binaryMultiline].
@@ -47,7 +33,6 @@ class Matrix {
      *
      * @param binaryMultiline A multiline binary string.
      * @see binaryStringToBitSet
-     * @throws IllegalArgumentException if the binary strings are not all the same length
      */
     constructor(binaryMultiline: String) : this(binaryMultiline.trimIndent().lines())
 
@@ -61,23 +46,12 @@ class Matrix {
          */
         fun binaryStringToBitSet(binaryString: String): BitSet {
             val bitSet = BitSet(binaryString.length)
-            for (i in binaryString.indices)
-                if (binaryString[i] == '1')
-                    bitSet.set(i)
-                else if (binaryString[i] != '0')
-                    throw IllegalArgumentException("Illegal character in binary string: ${binaryString[i]}")
+            for ((i, c) in binaryString.withIndex())
+                when {
+                    c == '1' -> bitSet.set(i)
+                    c != '0' -> throw IllegalArgumentException("Illegal character in binary string: $c")
+                }
             return bitSet
-        }
-    }
-
-    /**
-     * Prints the matrix to the console.
-     */
-    fun print() {
-        for (row in rows) {
-            for (i in 0..<columns)
-                print(if (row[i]) "1" else "0")
-            println()
         }
     }
 

@@ -1,13 +1,14 @@
 package com.leventebajak.sudoku
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 /**
  * Test for the [SudokuSolver] class.
  */
 class SudokuSolverTest {
-    @org.junit.jupiter.api.Test
+    @Test
     fun singleSolution() {
         val board = """
                 000260701
@@ -42,7 +43,7 @@ class SudokuSolverTest {
                 assertEquals(expectedSolution[row, col], solutions[0][row, col])
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     fun multipleSolutions() {
         val board = """
                 004500009

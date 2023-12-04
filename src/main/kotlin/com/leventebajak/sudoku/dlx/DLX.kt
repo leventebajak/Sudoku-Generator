@@ -1,11 +1,10 @@
 package com.leventebajak.sudoku.dlx
 
-import com.leventebajak.sudoku.Matrix
 import java.util.BitSet
 
 /**
- * An implementation of Donald Knuth's [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X) using
- * [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links).
+ * An implementation of Donald Knuth's [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X),
+ * using [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links).
  *
  * Based on the paper [Solving Sudoku efficiently with Dancing Links](https://www.kth.se/social/files/58861771f276547fe1dbf8d1/HLaestanderMHarrysson_dkand14.pdf)
  * by Hjalmar Laestander and Mattias Harrysson.
@@ -189,9 +188,5 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
             i = i.right as Column
         }
         return column
-    }
-
-    override fun toString(): String {
-        return "DLX(columns=${columnHeaders.size}, clues=${clues.size})"
     }
 }

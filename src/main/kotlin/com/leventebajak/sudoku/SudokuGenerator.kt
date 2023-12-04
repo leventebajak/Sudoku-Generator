@@ -1,13 +1,21 @@
 package com.leventebajak.sudoku
 
+import java.lang.IllegalArgumentException
+
 /**
- * Generates a [Sudoku] board with a unique solution.
+ * Generates [Sudoku] boards with unique solutions.
  */
 object SudokuGenerator {
     /**
-     * Determines how many clues are given.
+     * The difficulty of a Sudoku board.
+     * @property clues The number of clues given.
      */
-    enum class Difficulty { EASY, MEDIUM, HARD, VERY_HARD }
+    enum class Difficulty(val clues: Int) {
+        EASY(45),
+        MEDIUM(38),
+        HARD(30),
+        VERY_HARD(26)
+    }
 
     /**
      * Creates a Sudoku board with a given [difficulty].
@@ -17,14 +25,10 @@ object SudokuGenerator {
      */
     fun generate(difficulty: Difficulty): Sudoku {
         // The final number of clues is not guaranteed to be exact
-        val clueCount = when (difficulty) {
-            Difficulty.EASY -> 45
-            Difficulty.MEDIUM -> 38
-            Difficulty.HARD -> 30
-            Difficulty.VERY_HARD -> 26
-        }
+        val clueCount = difficulty.clues
 
-        val clues = getFilledBoard()
+        val solution = getFilledBoard()
+        val clues = solution.clone()
 
         val remainingCells = mutableListOf<Pair<Int, Int>>()
         for (row in 0..8)
@@ -35,26 +39,22 @@ object SudokuGenerator {
         var tries = 0
         val maxTries = 40
 
-        var solution: Board? = null
-
         while (removedCount < 81 - clueCount) {
             val (row, col) = remainingCells.random()
             val removedValue = clues[row, col]
             clues[row, col] = Board.EMPTY_CELL
 
-            solution = SudokuSolver.findUniqueSolutionFor(clues)
-
-            // If there is no unique solution, put the value back
-            if (solution == null) {
+            try {
+                SudokuSolver.findOnlySolution(clues)
+            } catch (e: IllegalArgumentException) {
+                // If there is no solution, put the value back
                 clues[row, col] = removedValue
 
                 // If we tried too many times, give up
-                if (++tries == maxTries) {
-                    solution = SudokuSolver.findUniqueSolutionFor(clues)
+                if (++tries == maxTries)
                     break
-                }
-
-                continue
+                else
+                    continue
             }
 
             remainingCells.remove(Pair(row, col))
@@ -62,7 +62,7 @@ object SudokuGenerator {
             tries = 0
         }
 
-        return Sudoku(clues, listOf(solution!!))
+        return Sudoku(clues, listOf(solution))
     }
 
     /**
@@ -82,8 +82,6 @@ object SudokuGenerator {
                 board[boxRow + j, boxCol + j] = numbers[j]
         }
 
-        val solutions = SudokuSolver.findNSolutionsFor(board, 1)
-
-        return solutions[0]
+        return SudokuSolver.findNSolutionsFor(board, 1)[0]
     }
 }

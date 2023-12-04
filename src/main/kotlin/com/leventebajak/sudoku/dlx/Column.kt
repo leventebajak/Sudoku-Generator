@@ -10,12 +10,11 @@ class Column(val id: Int) : Node() {
     var size: Int = 0
 
     /**
-     * Linking the left and right [nodes][Node] of the nodes in the [Column] to each other.
+     * Removes the column and all [nodes][Node] in it from the circular doubly-linked list in [DLX].
      */
     fun cover() {
         right.left = left
         left.right = right
-        size--
         var i = down
         while (i != this) {
             var j = i.right
@@ -30,7 +29,7 @@ class Column(val id: Int) : Node() {
     }
 
     /**
-     * Linking the left and right [nodes][Node] of the nodes in the [Column] to the nodes themselves.
+     * Reinserts the column and all [nodes][Node] in it into the circular doubly-linked list in [DLX].
      */
     fun uncover() {
         var i = up
@@ -46,7 +45,6 @@ class Column(val id: Int) : Node() {
         }
         right.left = this
         left.right = this
-        size++
     }
 
     override fun toString(): String {

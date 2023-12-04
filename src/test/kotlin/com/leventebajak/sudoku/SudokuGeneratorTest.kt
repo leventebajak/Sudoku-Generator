@@ -1,7 +1,7 @@
 package com.leventebajak.sudoku
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
@@ -21,6 +21,9 @@ class SudokuGeneratorTest {
                 for (j in 0..8) {
                     assertTrue(remainingInRow.remove(sudoku.solutions[0][i, j]))
                     assertTrue(remainingInCol.remove(sudoku.solutions[0][j, i]))
+                    assertTrue(
+                        sudoku.clues[i, j] == Board.EMPTY_CELL || sudoku.clues[i, j] == sudoku.solutions[0][i, j]
+                    )
                 }
             }
 
