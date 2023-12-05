@@ -22,7 +22,7 @@ class SudokuSolverTest {
                 703018000
             """.toBoard()
 
-        val solutions = SudokuSolver.findAllSolutionsFor(board)
+        val solutions = board.solve().toList()
 
         assertEquals(1, solutions.size)
 
@@ -57,7 +57,7 @@ class SudokuSolverTest {
                 008050040
             """.toBoard()
 
-        val solutions = SudokuSolver.findAllSolutionsFor(board)
+        val solutions = board.solve().toList()
 
         assertEquals(2, solutions.size)
 

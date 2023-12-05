@@ -27,7 +27,7 @@ class DLXTest {
                 0100001
             """.trimIndent()
         )
-        val solutions = dlx.findAllSolutions()
+        val solutions = dlx.findAllSolutions().toList()
         assertEquals(1, solutions.size)
         assertEquals(expectedSolution, solutions[0])
     }

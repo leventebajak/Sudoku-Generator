@@ -16,13 +16,13 @@ class Column(val id: Int) : Node() {
         right.left = left
         left.right = right
         var i = down
-        while (i != this) {
+        while (i !== this) {
             var j = i.right
-            while (j != i) {
-                j.down.up = j.up
-                j.up.down = j.down
-                j.column!!.size--
-                j = j.right
+            while (j !== i) with(j) {
+                down.up = up
+                up.down = down
+                column.size--
+                j = right
             }
             i = i.down
         }
@@ -33,21 +33,17 @@ class Column(val id: Int) : Node() {
      */
     fun uncover() {
         var i = up
-        while (i != this) {
+        while (i !== this) {
             var j = i.left
-            while (j != i) {
-                j.column!!.size++
-                j.down.up = j
-                j.up.down = j
-                j = j.left
+            while (j !== i) with(j) {
+                column.size++
+                down.up = this
+                up.down = this
+                j = left
             }
             i = i.up
         }
         right.left = this
         left.right = this
-    }
-
-    override fun toString(): String {
-        return "Column(id=$id, size=$size)"
     }
 }

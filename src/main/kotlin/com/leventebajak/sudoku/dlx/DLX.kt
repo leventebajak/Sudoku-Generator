@@ -14,9 +14,9 @@ import java.util.BitSet
  *
  * @property header the header of the internal structure (the root of the circular doubly-linked list)
  * @property columnHeaders the [Column] headers of the internal structure
- * @property clues the [nodes][Node] that must be included in the solution
+ * @property clues the [Node]s that must be included in the solution
  */
-open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
+open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
     private val header = Column(-1)
     private val columnHeaders = Array(matrix.columns) { Column(it) }
     private val clues = mutableListOf<Node>()
@@ -25,12 +25,12 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
      * Initializing the internal structure.
      */
     init {
-        for (i in 0..<matrix.columns) {
-            columnHeaders[i].left = header.left
-            columnHeaders[i].right = header
-            columnHeaders[i].column = header
-            header.left.right = columnHeaders[i]
-            header.left = columnHeaders[i]
+        for (columnHeader in columnHeaders) {
+            columnHeader.left = header.left
+            columnHeader.right = header
+            columnHeader.column = header
+            header.left.right = columnHeader
+            header.left = columnHeader
             header.size++
         }
         val remainingClueRows = clueRows.toMutableList()
@@ -45,7 +45,7 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
                 columnHeaders[j].size++
                 columnHeaders[j].up.down = node
                 columnHeaders[j].up = node
-                if (prev != null) {
+                if (prev !== null) {
                     node.left = prev
                     node.right = prev.right
                     prev.right.left = node
@@ -63,124 +63,108 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
                 }
             }
         }
+
+        // Cover the columns satisfied by the clues
+        for (node in clues) {
+            node.column.cover()
+            var i = node.right
+            while (i !== node) {
+                i.column.cover()
+                i = i.right
+            }
+        }
     }
 
     /**
-     * Starting the recursive search for solutions.
+     * Starting the [recursive search][recursiveSearch] for solutions.
      *
-     * @param stopAfter the maximum number of solutions to find before stopping
-     * @return a list of solutions (each solution is a list of [nodes][Node])
+     * @return a [Sequence] of [Solution]s
      */
-    private fun startSearch(stopAfter: Int): List<List<Node>> {
-        // Cover the columns satisfied by the clues
-        for (node in clues) {
-            node.column!!.cover()
-            var i = node.right
-            while (i != node) {
-                i.column!!.cover()
-                i = i.right
-            }
-        }
-
-        // Search for solutions
-        val solutions = mutableListOf<List<Node>>()
-        recursiveSearch(solutions, clues, stopAfter)
-
-        // Uncover the columns satisfied by the clues
-        for (node in clues) {
-            node.column!!.uncover()
-            var i = node.right
-            while (i != node) {
-                i.column!!.uncover()
-                i = i.right
-            }
-        }
-
-        return solutions
-    }
+    private fun search(): Sequence<Solution> = sequence { yieldAll(recursiveSearch(clues)) }
 
     /**
      * Searching for solutions recursively.
+     * Should only be used by [search], otherwise the clues will not be covered.
      *
-     * @param solutions a list of solutions (each solution is a list of [nodes][Node])
-     * @param currentSolution the current solution being built
-     * @param stopAfter the maximum number of solutions to find before stopping (use -1 for no limit)
+     * @param solution the current solution being built
+     * @return a [Sequence] of [Solution]s
+     * @see search
      */
-    private fun recursiveSearch(
-        solutions: MutableList<List<Node>>,
-        currentSolution: MutableList<Node>,
-        stopAfter: Int
-    ) {
-        if (stopAfter == solutions.size)
-            return
-        if (header.right as Column == header) {
-            solutions.add(currentSolution.toList())
-            return
+    private fun recursiveSearch(solution: MutableList<Node>): Sequence<Solution> = sequence {
+        if (header.right as Column === header) {
+            yield(solution.toList())
+            return@sequence
         }
         val column = chooseMinColumn()
         if (column.size == 0)
-            return
+            return@sequence // No solution
         column.cover()
         var r = column.down
-        while (r != column) {
-            currentSolution.add(r)
+        while (r !== column) {
+            solution.add(r)
             var j = r.right
-            while (j != r) {
-                j.column!!.cover()
+            while (j !== r) {
+                j.column.cover()
                 j = j.right
             }
-            recursiveSearch(solutions, currentSolution, stopAfter)
-            if (stopAfter == solutions.size)
-                return
-            currentSolution.removeAt(currentSolution.lastIndex)
+            yieldAll(recursiveSearch(solution))
+            solution.removeAt(solution.lastIndex)
             j = r.left
-            while (j != r) {
-                j.column!!.uncover()
+            while (j !== r) {
+                j.column.uncover()
                 j = j.left
             }
             r = r.down
         }
         column.uncover()
-        return
     }
 
-    fun findNSolutions(n: Int) = startSearch(n).map { solutionToMatrix(it) }
-
-    fun findAllSolutions() = findNSolutions(-1)
 
     /**
-     * Converting a solution to a [Matrix].
+     * Finding the first [n] solutions.
      *
-     * @param solution a list of [nodes][Node]
-     * @return a [Matrix] representing the [solution]
+     * @param n the number of solutions to find
+     * @return a [Sequence] of [Matrices][Matrix]
      */
-    private fun solutionToMatrix(solution: List<Node>): Matrix {
-        val result = Matrix(columnHeaders.size, mutableListOf())
-        for (node in solution) {
+    fun findNSolutions(n: Int) = findAllSolutions().take(n)
+
+    /**
+     * Finding all solutions.
+     *
+     * @return a [Sequence] of [Matrices][Matrix]
+     */
+    fun findAllSolutions() = search().map { it.toMatrix() }
+
+    /**
+     * Converting a [Solution] to a [Matrix].
+     *
+     * @return a [Matrix] representing the solution.
+     */
+    private fun Solution.toMatrix() = Matrix(columnHeaders.size, mutableListOf()).apply {
+        this@toMatrix.forEach { node ->
             val row = BitSet()
-            row[node.column!!.id] = true
+            row[node.column.id] = true
             var j = node.right
-            while (j != node) {
-                row[j.column!!.id] = true
+            while (j !== node) {
+                row[j.column.id] = true
                 j = j.right
             }
-            result.rows.add(row)
+            rows.add(row)
         }
-        return result
     }
 
     /**
-     * Choosing the [Column] with the minimum number of [nodes][Node] to minimize the branching factor.
+     * Choosing the [Column] with the minimum number of [Node]s to minimize the branching factor.
      *
-     * @return the [Column] with the minimum number of [nodes][Node]
+     * @return the [Column] with the minimum number of [Node]s
+     * @throws IllegalArgumentException if there are no columns left to choose
      */
     private fun chooseMinColumn(): Column {
-        if (header.size == 0)
-            throw Exception("No column left to choose")
+        require(header.size > 0) { "No column left to choose" }
         var min = Int.MAX_VALUE
         var i = header.right as Column
         var column = i
-        while (i != header) {
+        while (i !== header) {
             if (i.size < min) {
                 min = i.size
                 column = i
@@ -190,3 +174,8 @@ open class DLX(matrix: Matrix, clueRows: MutableList<Int> = mutableListOf()) {
         return column
     }
 }
+
+/**
+ * Alias for a [List] of [Node]s.
+ */
+private typealias Solution = List<Node>

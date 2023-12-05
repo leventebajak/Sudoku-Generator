@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a sudoku solver and generator written in Kotlin, that uses Donald Knuth's
+This is a sudoku solver and generator package written in Kotlin, that uses Donald Knuth's
 [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X) to solve the puzzles. The algorithm is implemented
 using [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links).
 
@@ -14,14 +14,13 @@ solutions.
 ### Generating a puzzle
 
 ```kotlin
-fun main() {
-    val sudoku = SudokuGenerator.generate(SudokuGenerator.Difficulty.EASY)
-    println("Clues:")
-    sudoku.clues.print()
-    for ((index, solution) in sudoku.solutions.withIndex()) {
-        println("Solution ${index + 1} of ${sudoku.solutions.size}:")
-        solution.print()
-    }
+val sudoku = SudokuGenerator.generate(SudokuGenerator.Difficulty.EASY)
+println("Clues:")
+sudoku.clues.print()
+
+for ((index, solution) in sudoku.solutions.withIndex()) {
+    println("Solution ${index + 1} of ${sudoku.solutions.size}:")
+    solution.print()
 }
 ```
 
@@ -73,31 +72,30 @@ Solution 1 of 1:
 ### Solving a puzzle
 
 ```kotlin
-fun main() {
-    val sudoku = Sudoku(
-        """
-            004500009
-            720000050
-            000104300
-            003000000
-            490007000
-            000043208
-            002030006
-            500000902
-            008050040
-        """.toBoard()
-    )
-    for ((index, solution) in sudoku.solutions.withIndex()) {
-        println("Solution ${index + 1} of ${sudoku.solutions.size}:")
-        solution.print()
-    }
+val clues = """
+        004500009
+        720000050
+        000104300
+        003000000
+        490007000
+        000043208
+        002030006
+        500000902
+        008050040
+    """.toBoard()
+
+val solutions = clues.solve()
+
+for ((index, solution) in solutions.withIndex()) {
+    println("Solution ${index + 1}:")
+    solution.print()
 }
 ```
 
 **Output**:
 
 ```
-Solution 1 of 2:
+Solution 1:
 ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ 3 │ 1 │ 4 ┃ 5 │ 7 │ 2 ┃ 8 │ 6 │ 9 ┃
 ┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
@@ -117,7 +115,7 @@ Solution 1 of 2:
 ┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
 ┃ 9 │ 7 │ 8 ┃ 2 │ 5 │ 6 ┃ 1 │ 4 │ 3 ┃
 ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
-Solution 2 of 2:
+Solution 2:
 ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ 3 │ 1 │ 4 ┃ 5 │ 7 │ 6 ┃ 8 │ 2 │ 9 ┃
 ┃───┼───┼───┃───┼───┼───┃───┼───┼───┃

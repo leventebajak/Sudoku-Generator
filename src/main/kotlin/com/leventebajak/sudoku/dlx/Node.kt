@@ -14,9 +14,5 @@ open class Node {
     var down: Node = this
     var left: Node = this
     var right: Node = this
-    var column: Column? = null
-
-    override fun toString(): String {
-        return "Node(column=${column?.id})"
-    }
+    lateinit var column: Column
 }

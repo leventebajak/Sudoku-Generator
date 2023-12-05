@@ -30,10 +30,11 @@ object SudokuGenerator {
         val solution = getFilledBoard()
         val clues = solution.clone()
 
-        val remainingCells = mutableListOf<Pair<Int, Int>>()
-        for (row in 0..8)
-            for (col in 0..8)
-                remainingCells.add(Pair(row, col))
+        val remainingCells = mutableListOf<Pair<Int, Int>>().apply {
+            for (row in 0..8)
+                for (col in 0..8)
+                    add(Pair(row, col))
+        }
         var removedCount = 0
 
         var tries = 0
@@ -46,7 +47,7 @@ object SudokuGenerator {
 
             try {
                 SudokuSolver.findOnlySolution(clues)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 // If there is no solution, put the value back
                 clues[row, col] = removedValue
 
@@ -70,18 +71,13 @@ object SudokuGenerator {
      *
      * @return A 9x9 array of numbers.
      */
-    private fun getFilledBoard(): Board {
-        val board = Board()
-
+    private fun getFilledBoard() = Board().apply {
         // Fill the diagonal cells
-        for (i in 0..2) {
-            val boxRow = i * 3
-            val boxCol = i * 3
+        repeat(3) { box ->
             val numbers = (1..9).shuffled()
-            for (j in 0..2)
-                board[boxRow + j, boxCol + j] = numbers[j]
+            repeat(3) { row ->
+                this[box * 3 + row, box * 3 + row] = numbers[row]
+            }
         }
-
-        return SudokuSolver.findNSolutionsFor(board, 1)[0]
-    }
+    }.let { SudokuSolver.findNSolutionsFor(it, 1).first() }
 }

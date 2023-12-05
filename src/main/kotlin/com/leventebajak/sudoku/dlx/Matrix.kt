@@ -20,9 +20,10 @@ class Matrix(val columns: Int, val rows: MutableList<BitSet>) {
     constructor(binaryStrings: List<String>) : this(
         columns = binaryStrings[0].length,
         rows = MutableList(binaryStrings.size) {
-            binaryStrings[it].trim()
-            if (binaryStrings[it].length != binaryStrings[0].length)
-                throw IllegalArgumentException("All rows must have the same length")
+            binaryStrings[it].trim().also { line ->
+                if (line.length != binaryStrings[0].length)
+                    throw IllegalArgumentException("All binary strings must be the same length")
+            }
             binaryStringToBitSet(binaryStrings[it])
         }
     )
@@ -44,14 +45,13 @@ class Matrix(val columns: Int, val rows: MutableList<BitSet>) {
          * @return A [BitSet] with the same bits as the [binary string][binaryString].
          * @throws IllegalArgumentException if the [binary string][binaryString] contains characters other than '0' and '1'
          */
-        fun binaryStringToBitSet(binaryString: String): BitSet {
-            val bitSet = BitSet(binaryString.length)
-            for ((i, c) in binaryString.withIndex())
+        fun binaryStringToBitSet(binaryString: String) = BitSet(binaryString.length).apply {
+            binaryString.forEachIndexed { index, char ->
                 when {
-                    c == '1' -> bitSet.set(i)
-                    c != '0' -> throw IllegalArgumentException("Illegal character in binary string: $c")
+                    char == '1' -> set(index)
+                    char != '0' -> throw IllegalArgumentException("Binary string must contain only '0' and '1' characters")
                 }
-            return bitSet
+            }
         }
     }
 
@@ -67,9 +67,5 @@ class Matrix(val columns: Int, val rows: MutableList<BitSet>) {
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = columns
-        result = 31 * result + rows.hashCode()
-        return result
-    }
+    override fun hashCode() = 31 * columns + rows.hashCode()
 }

@@ -12,14 +12,11 @@ object SudokuSolver {
      * Finds all solutions to the [board].
      *
      * @param board The [Board] to solve.
-     * @param limit The maximum number of solutions to find before stopping.
-     * @return A list of all solutions to the [board].
+     * @return A [Sequence] of all solutions to the [board].
      */
-    fun findAllSolutionsFor(board: Board, limit: Int = 1_000): List<Board> {
-        val solutions = findNSolutionsFor(board, limit)
-        if (solutions.size == limit)
-            println("$limit solutions found, stopping")
-        return solutions
+    fun findAllSolutionsFor(board: Board): Sequence<Board> {
+        val dlx = DLX(exactCoverMatrix, getClueRows(board))
+        return dlx.findAllSolutions().map { it.toBoard() }
     }
 
     /**
@@ -27,11 +24,11 @@ object SudokuSolver {
      *
      * @param board The [Board] to solve.
      * @param n The maximum number of solutions to find.
-     * @return A list of maximum [n] solutions to the [board].
+     * @return A [List] of maximum [n] solutions to the [board].
      */
     fun findNSolutionsFor(board: Board, n: Int): List<Board> {
         val dlx = DLX(exactCoverMatrix, getClueRows(board))
-        val solutions = dlx.findNSolutions(n)
+        val solutions = dlx.findNSolutions(n).toList()
         return solutions.map { it.toBoard() }
     }
 
@@ -44,9 +41,9 @@ object SudokuSolver {
      */
     fun findOnlySolution(board: Board): Board {
         val dlx = DLX(exactCoverMatrix, getClueRows(board))
-        val solutions = dlx.findNSolutions(2)
-        return if (solutions.size == 1) solutions[0].toBoard()
-        else throw IllegalArgumentException("The board has no or multiple solutions")
+        val solutions = dlx.findNSolutions(2).toList()
+        require(solutions.size == 1) { "The board has no or multiple solutions" }
+        return solutions[0].toBoard()
     }
 
     /**
@@ -56,15 +53,17 @@ object SudokuSolver {
      * @param board The [Board] with the clues.
      * @return The indices of the rows of the [exactCoverMatrix] corresponding to the clues in the [board].
      */
-    private fun getClueRows(board: Board): MutableList<Int> {
-        val clueRows = mutableListOf<Int>()
-        for (row in 0..8) for (col in 0..8) {
-            val n = board[row, col]
-            if (n == Board.EMPTY_CELL)
-                continue
-            clueRows.add(row * 81 + col * 9 + n - 1)
+    private fun getClueRows(board: Board): List<Int> {
+        return mutableListOf<Int>().apply {
+            repeat(9) { row ->
+                repeat(9) { col ->
+                    board[row, col].let { n ->
+                        if (n != Board.EMPTY_CELL)
+                            add(row * 81 + col * 9 + n - 1)
+                    }
+                }
+            }
         }
-        return clueRows
     }
 
     /**
@@ -72,31 +71,36 @@ object SudokuSolver {
      * representation of the constraints of a Sudoku [Board].
      */
     private val exactCoverMatrix: Matrix by lazy {
-        val columns = 324 // 9 rows * 9 columns * 4 constraints
-        val rows = 729 // 9 rows * 9 columns * 9 numbers
-        val matrix = Matrix(columns, MutableList(rows) { BitSet(columns) })
+        val columnCount = 324 // 9 rows * 9 columns * 4 constraints
+        val rowCount = 729 // 9 rows * 9 columns * 9 numbers
+        Matrix(columnCount, MutableList(rowCount) { BitSet(columnCount) }).apply {
+            // Fill in the matrix with the constraints
+            repeat(9) { row ->
+                repeat(9) { col ->
+                    repeat(9) { n ->
+                        with(rows[row * 81 + col * 9 + n]) {
+                            // Cell constraint
+                            set(row * 9 + col)
 
-        // Fill in the matrix with possible combinations
-        for (row in 0..8) {
-            for (col in 0..8) {
-                for (n in 1..9) {
-                    val i = row * 81 + col * 9 + n - 1
+                            // Row constraint
+                            set(81 + row * 9 + n)
 
-                    // Cell constraint
-                    matrix.rows[i][row * 9 + col] = true
+                            // Column constraint
+                            set(162 + col * 9 + n)
 
-                    // Row constraint
-                    matrix.rows[i][81 + row * 9 + n - 1] = true
-
-                    // Column constraint
-                    matrix.rows[i][162 + col * 9 + n - 1] = true
-
-                    // Box constraint
-                    matrix.rows[i][243 + (row / 3 * 3 + col / 3) * 9 + n - 1] = true
+                            // Box constraint
+                            set(243 + (row / 3 * 3 + col / 3) * 9 + n)
+                        }
+                    }
                 }
             }
         }
-
-        matrix
     }
 }
+
+/**
+ * Finds all solutions for this [Board].
+ *
+ * @return A [Sequence] of all solutions for this [Board].
+ */
+fun Board.solve() = SudokuSolver.findAllSolutionsFor(this)
