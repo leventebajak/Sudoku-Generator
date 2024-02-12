@@ -11,40 +11,36 @@ object Generator {
      * @return A [Sudoku] with the given [difficulty].
      */
     fun generate(difficulty: Difficulty): Sudoku {
-        loop@ while (true) {
+        start@ while (true) {
             val solution = getFilledBoard()
             val clues = solution.clone()
 
-            val remainingCells = mutableListOf<Pair<Int, Int>>().apply {
-                for (row in 0..8)
-                    for (col in 0..8)
-                        add(Pair(row, col))
-            }
+            var clueCount = 81
 
-            var leftToRemove = 81 - difficulty.clues
+            val remainingIndices = (0..<81).toMutableSet()
 
-            val tries = mutableSetOf<Pair<Int, Int>>()
+            val triedIndices = mutableSetOf<Int>()
 
-            while (leftToRemove > 0) {
-                if (remainingCells.isEmpty())
-                    // There are no more clues to remove, so start over with a new board.
-                    continue@loop
+            while (clueCount > difficulty.clues) {
+                // If there are no more clues to remove, start over with a new board.
+                if (remainingIndices.isEmpty())
+                    continue@start
 
-                val (row, col) = remainingCells.removeAt((0..<remainingCells.size).random())
-                val removedValue = clues[row, col]
-                clues[row, col] = Board.EMPTY_CELL
+                val index = remainingIndices.random().also { remainingIndices.remove(it) }
+                val removedValue = clues[index]
+                clues[index] = Board.EMPTY_CELL
 
                 val solutions = Solver.findNSolutionsFor(clues, 2).size
                 if (solutions != 1) {
-                    // If there is no unique solution, revert the removal.
-                    clues[row, col] = removedValue
-                    tries.add(Pair(row, col))
+                    // If the number of solutions is no longer 1, put the value back.
+                    clues[index] = removedValue
+                    triedIndices.add(index)
                     continue
                 }
 
-                remainingCells.addAll(tries)
-                tries.clear()
-                leftToRemove--
+                remainingIndices.addAll(triedIndices)
+                triedIndices.clear()
+                clueCount--
             }
 
             return Sudoku(clues, listOf(solution))

@@ -34,4 +34,12 @@ class GeneratorTest {
             }
         }
     }
+
+    @Test
+    fun generate100() {
+        println("Generating 100 sudoku boards. This should only take a couple seconds...")
+        repeat(100) {
+            Sudoku.generate(Difficulty.entries.random())
+        }
+    }
 }
