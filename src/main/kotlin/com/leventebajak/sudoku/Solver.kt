@@ -1,13 +1,14 @@
+@file:JvmName("SolverUtils")
+
 package com.leventebajak.sudoku
 
-import com.leventebajak.sudoku.dlx.DLX
-import com.leventebajak.sudoku.dlx.Matrix
-import java.util.BitSet
+import com.leventebajak.dlx.DLX
+import com.leventebajak.dlx.Matrix
 
 /**
  * Sudoku solver using [DLX].
  */
-object SudokuSolver {
+object Solver {
     /**
      * Finds all solutions to the [board].
      *
@@ -15,8 +16,7 @@ object SudokuSolver {
      * @return A [Sequence] of all solutions to the [board].
      */
     fun findAllSolutionsFor(board: Board): Sequence<Board> {
-        val dlx = DLX(exactCoverMatrix, getClueRows(board))
-        return dlx.findAllSolutions().map { it.toBoard() }
+        return DLX(exactCoverMatrix, getClueRows(board)).findAllSolutions().map { it.toBoard() }
     }
 
     /**
@@ -27,23 +27,8 @@ object SudokuSolver {
      * @return A [List] of maximum [n] solutions to the [board].
      */
     fun findNSolutionsFor(board: Board, n: Int): List<Board> {
-        val dlx = DLX(exactCoverMatrix, getClueRows(board))
-        val solutions = dlx.findNSolutions(n).toList()
-        return solutions.map { it.toBoard() }
-    }
-
-    /**
-     * Finds the only solution to the [board].
-     *
-     * @param board The [Board] to solve.
-     * @return The only solution to the [board] if it exists.
-     * @throws IllegalArgumentException If the [board] has no or multiple solutions.
-     */
-    fun findOnlySolution(board: Board): Board {
-        val dlx = DLX(exactCoverMatrix, getClueRows(board))
-        val solutions = dlx.findNSolutions(2).toList()
-        require(solutions.size == 1) { "The board has no or multiple solutions" }
-        return solutions[0].toBoard()
+        require(n > 0) { "The number of solutions to find must be positive." }
+        return DLX(exactCoverMatrix, getClueRows(board)).findNSolutions(n).toList().map { it.toBoard() }
     }
 
     /**
@@ -73,28 +58,28 @@ object SudokuSolver {
     private val exactCoverMatrix: Matrix by lazy {
         val columnCount = 324 // 9 rows * 9 columns * 4 constraints
         val rowCount = 729 // 9 rows * 9 columns * 9 numbers
-        Matrix(columnCount, MutableList(rowCount) { BitSet(columnCount) }).apply {
+        Matrix(List(rowCount) { MutableList(columnCount) { false } }.apply {
             // Fill in the matrix with the constraints
             repeat(9) { row ->
                 repeat(9) { col ->
                     repeat(9) { n ->
-                        with(rows[row * 81 + col * 9 + n]) {
+                        with(this[row * 81 + col * 9 + n]) {
                             // Cell constraint
-                            set(row * 9 + col)
+                            this[row * 9 + col] = true
 
                             // Row constraint
-                            set(81 + row * 9 + n)
+                            this[81 + row * 9 + n] = true
 
                             // Column constraint
-                            set(162 + col * 9 + n)
+                            this[162 + col * 9 + n] = true
 
                             // Box constraint
-                            set(243 + (row / 3 * 3 + col / 3) * 9 + n)
+                            this[243 + (row / 3 * 3 + col / 3) * 9 + n] = true
                         }
                     }
                 }
             }
-        }
+        })
     }
 }
 
@@ -103,4 +88,4 @@ object SudokuSolver {
  *
  * @return A [Sequence] of all solutions for this [Board].
  */
-fun Board.solve() = SudokuSolver.findAllSolutionsFor(this)
+fun Board.solutionSequence() = Solver.findAllSolutionsFor(this)

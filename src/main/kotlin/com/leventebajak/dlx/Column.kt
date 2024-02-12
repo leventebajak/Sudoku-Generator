@@ -1,4 +1,4 @@
-package com.leventebajak.sudoku.dlx
+package com.leventebajak.dlx
 
 /**
  * A [Node] that represents a column header in the circular doubly-linked list in [DLX].

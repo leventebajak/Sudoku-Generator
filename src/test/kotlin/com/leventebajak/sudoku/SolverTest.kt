@@ -5,9 +5,9 @@ import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
 /**
- * Test for the [SudokuSolver] class.
+ * Test for the [Solver] class.
  */
-class SudokuSolverTest {
+class SolverTest {
     @Test
     fun singleSolution() {
         val board = """
@@ -22,7 +22,7 @@ class SudokuSolverTest {
                 703018000
             """.toBoard()
 
-        val solutions = board.solve().toList()
+        val solutions = board.solutionSequence().toList()
 
         assertEquals(1, solutions.size)
 
@@ -57,7 +57,7 @@ class SudokuSolverTest {
                 008050040
             """.toBoard()
 
-        val solutions = board.solve().toList()
+        val solutions = board.solutionSequence().toList()
 
         assertEquals(2, solutions.size)
 
@@ -99,5 +99,24 @@ class SudokuSolverTest {
             }
 
         assertTrue(match.xor(matchOpposite))
+    }
+
+    @Test
+    fun noSolution() {
+        val board = """
+                200260701
+                680070090
+                190004500
+                820100040
+                004602900
+                050003028
+                009300074
+                040050036
+                703018000
+            """.toBoard()
+
+        val solutions = board.solutionSequence().toList()
+
+        assertEquals(0, solutions.size)
     }
 }

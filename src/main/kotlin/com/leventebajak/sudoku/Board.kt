@@ -1,6 +1,9 @@
+@file:JvmName("BoardUtils")
+
 package com.leventebajak.sudoku
 
-import com.leventebajak.sudoku.dlx.Matrix
+import com.leventebajak.dlx.Matrix
+import com.leventebajak.dlx.nextTrueIndex
 
 /**
  * A 9x9 [Sudoku] board.
@@ -16,6 +19,11 @@ data class Board(private val cells: IntArray = IntArray(81) { EMPTY_CELL }) : It
          * The value of an empty cell.
          */
         const val EMPTY_CELL = 0
+
+        /**
+         * The set of valid numbers.
+         */
+        @JvmStatic
         val NUMBERS = (1..9).toSet() + EMPTY_CELL
     }
 
@@ -97,7 +105,7 @@ fun Board.print() {
     println("┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓")
     repeat(9) { row ->
         print("┃")
-        repeat(9) { col -> print(" ${this[row, col]} ${if (col % 3 == 2) "┃" else "│"}") }
+        repeat(9) { col -> print(" ${this[row, col].let { if (it == Board.EMPTY_CELL) " " else it }} ${if (col % 3 == 2) "┃" else "│"}") }
         println()
         println(
             when {
@@ -114,11 +122,15 @@ fun Board.print() {
  *
  * @return The [Board] represented by the string.
  */
-fun String.toBoard() = Board().apply {
-    val lines = this@toBoard.trimIndent().split("\n")
-    repeat(9) { row ->
-        repeat(9) { col ->
-            this[index(row, col)] = lines[row][col] - '0'
+fun String.toBoard() = Board().also {
+    val lines = this.trimIndent().lines()
+    require(lines.size == 9) { "Sudoku board must be 9x9" }
+    for ((row, line) in lines.withIndex()) {
+        require(line.length == 9) { "Sudoku board must be 9x9" }
+        for ((col, char) in line.withIndex()) {
+            val value = char.toString().toIntOrNull()
+            require(value in Board.NUMBERS) { "Sudoku board must contain only numbers in ${Board.NUMBERS}" }
+            it[row, col] = value ?: Board.EMPTY_CELL
         }
     }
 }
@@ -129,22 +141,20 @@ fun String.toBoard() = Board().apply {
  * @return The [Board] represented by the [Matrix].
  * @throws IllegalArgumentException If the matrix does not represent a Sudoku board.
  */
-fun Matrix.toBoard(): Board {
-    val board = Board()
-    for (bitSet in rows) {
-        val cellConstraint = bitSet.nextSetBit(0)
+fun Matrix.toBoard() = Board().also {
+    for (matrixRow in this) {
+        val cellConstraint = matrixRow.nextTrueIndex(0)
         require(cellConstraint != -1 && cellConstraint < 81) { "The matrix does not represent a Sudoku board" }
 
         val row = cellConstraint / 9
         val col = cellConstraint % 9
-        require(board[row, col] == Board.EMPTY_CELL) { "Multiple numbers in the same cell" }
+        require(it[row, col] == Board.EMPTY_CELL) { "Multiple numbers in the same cell" }
 
-        val rowConstraint = bitSet.nextSetBit(81)
+        val rowConstraint = matrixRow.nextTrueIndex(81)
         require(rowConstraint != -1 && rowConstraint < 162) { "The matrix does not represent a Sudoku board" }
 
         val number = rowConstraint - 81 - row * 9 + 1
 
-        board[row, col] = number
+        it[row, col] = number
     }
-    return board
 }

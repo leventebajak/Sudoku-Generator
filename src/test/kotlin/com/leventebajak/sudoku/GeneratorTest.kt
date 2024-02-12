@@ -5,13 +5,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Tests for [SudokuGenerator] class.
+ * Tests for [Generator] class.
  */
-class SudokuGeneratorTest {
+class GeneratorTest {
     @Test
     fun generate() {
-        for (difficulty in SudokuGenerator.Difficulty.entries) {
-            val sudoku = SudokuGenerator.generate(difficulty)
+        for (difficulty in Difficulty.entries) {
+            val sudoku = Sudoku.generate(difficulty)
 
             assertEquals(1, sudoku.solutions.size)
 

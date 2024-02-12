@@ -1,6 +1,4 @@
-package com.leventebajak.sudoku.dlx
-
-import java.util.BitSet
+package com.leventebajak.dlx
 
 /**
  * An implementation of Donald Knuth's [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X),
@@ -34,9 +32,9 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
             header.size++
         }
         val remainingClueRows = clueRows.toMutableList()
-        for ((index, row) in matrix.rows.withIndex()) {
+        for ((index, row) in matrix.withIndex()) {
             var prev: Node? = null
-            var j = row.nextSetBit(0)
+            var j = row.nextTrueIndex(0)
             while (j != -1) {
                 val node = Node()
                 node.up = columnHeaders[j].up
@@ -55,7 +53,7 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
                     node.right = node
                 }
                 prev = node
-                j = row.nextSetBit(j + 1)
+                j = row.nextTrueIndex(j + 1)
 
                 if (index in remainingClueRows) {
                     clues.add(node)
@@ -93,7 +91,7 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
     private fun recursiveSearch(solution: MutableList<Node>): Sequence<Solution> = sequence {
         if (header.right as Column === header) {
             yield(solution.toList())
-            return@sequence
+            return@sequence // Solution found
         }
         val column = chooseMinColumn()
         if (column.size == 0)
@@ -140,18 +138,18 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
      *
      * @return a [Matrix] representing the solution.
      */
-    private fun Solution.toMatrix() = Matrix(columnHeaders.size, mutableListOf()).apply {
-        this@toMatrix.forEach { node ->
-            val row = BitSet()
-            row[node.column.id] = true
-            var j = node.right
-            while (j !== node) {
-                row[j.column.id] = true
-                j = j.right
+    private fun Solution.toMatrix() = Matrix(
+        this.map { node ->
+            MutableList(columnHeaders.size) { false }.apply {
+                this[node.column.id] = true
+                var j = node.right
+                while (j !== node) {
+                    this[j.column.id] = true
+                    j = j.right
+                }
             }
-            rows.add(row)
         }
-    }
+    )
 
     /**
      * Choosing the [Column] with the minimum number of [Node]s to minimize the branching factor.

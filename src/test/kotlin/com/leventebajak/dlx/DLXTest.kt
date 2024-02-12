@@ -1,4 +1,4 @@
-package com.leventebajak.sudoku.dlx
+package com.leventebajak.dlx
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,25 +9,23 @@ import kotlin.test.assertEquals
 class DLXTest {
     @Test
     fun test() {
-        val matrix = Matrix(
-            """
+        val matrix = """
                 0010110
                 1001001
                 0110010
                 1001000
                 0100001
                 0001101
-            """
-        )
+            """.toMatrix()
+
         val dlx = DLX(matrix)
-        val expectedSolution = Matrix(
-            """
+        val solutions = dlx.findAllSolutions().toList()
+
+        val expectedSolution = """
                 1001000
                 0010110
                 0100001
-            """.trimIndent()
-        )
-        val solutions = dlx.findAllSolutions().toList()
+            """.toMatrix()
         assertEquals(1, solutions.size)
         assertEquals(expectedSolution, solutions[0])
     }

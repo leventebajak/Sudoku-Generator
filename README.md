@@ -11,10 +11,12 @@ solutions.
 
 ## Usage
 
+The usage of this package is demonstrated in the [`playground.ipynb`](./src/notebooks/playground.ipynb) notebook.
+
 ### Generating a puzzle
 
 ```kotlin
-val sudoku = SudokuGenerator.generate(SudokuGenerator.Difficulty.EASY)
+val sudoku = Sudoku.generate(Difficulty.EASY)
 println("Clues:")
 sudoku.clues.print()
 
@@ -84,7 +86,7 @@ val clues = """
         008050040
     """.toBoard()
 
-val solutions = clues.solve()
+val solutions = clues.solutionSequence()
 
 for ((index, solution) in solutions.withIndex()) {
     println("Solution ${index + 1}:")
