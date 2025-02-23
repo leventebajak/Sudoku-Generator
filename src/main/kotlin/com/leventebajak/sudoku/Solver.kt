@@ -4,6 +4,7 @@ package com.leventebajak.sudoku
 
 import com.leventebajak.dlx.DLX
 import com.leventebajak.dlx.Matrix
+import com.leventebajak.dlx.nextTrueIndex
 
 /**
  * Sudoku solver using [DLX].
@@ -15,8 +16,8 @@ object Solver {
      * @param board The [Board] to solve.
      * @return A [Sequence] of all solutions to the [board].
      */
-    fun findAllSolutionsFor(board: Board): Sequence<Board> {
-        return DLX(exactCoverMatrix, getClueRows(board)).findAllSolutions().map { it.toBoard() }
+    fun solve(board: Board): Sequence<Board> {
+        return DLX.run(exactCoverMatrix, getClueRows(board)).map { it.toBoard() }
     }
 
     /**
@@ -26,9 +27,9 @@ object Solver {
      * @param n The maximum number of solutions to find.
      * @return A [List] of maximum [n] solutions to the [board].
      */
-    fun findNSolutionsFor(board: Board, n: Int): List<Board> {
+    fun solve(board: Board, n: Int): List<Board> {
         require(n > 0) { "The number of solutions to find must be positive." }
-        return DLX(exactCoverMatrix, getClueRows(board)).findNSolutions(n).toList().map { it.toBoard() }
+        return solve(board).take(n).toList()
     }
 
     /**
@@ -43,7 +44,7 @@ object Solver {
             repeat(9) { row ->
                 repeat(9) { col ->
                     board[row, col].let { n ->
-                        if (n != Board.EMPTY_CELL)
+                        if (n != Board.EMPTY)
                             add(row * 81 + col * 9 + n - 1)
                     }
                 }
@@ -81,11 +82,35 @@ object Solver {
             }
         })
     }
+
+    /**
+     * Converts the [Matrix] to a sudoku [Board].
+     *
+     * @return The [Board] represented by the [Matrix].
+     * @throws IllegalArgumentException If the matrix does not represent a Sudoku board.
+     */
+    private fun Matrix.toBoard() = Board().also { board ->
+        forEach { matrixRow ->
+            val cellConstraint = matrixRow.nextTrueIndex(0)
+            require(cellConstraint != -1 && cellConstraint < 81) { "The matrix does not represent a Sudoku board" }
+
+            val row = cellConstraint / 9
+            val col = cellConstraint % 9
+            require(board[row, col] == Board.EMPTY) { "Multiple numbers in the same cell" }
+
+            val rowConstraint = matrixRow.nextTrueIndex(81)
+            require(rowConstraint != -1 && rowConstraint < 162) { "The matrix does not represent a Sudoku board" }
+
+            val number = rowConstraint - 81 - row * 9 + 1
+
+            board[row, col] = number
+        }
+    }
 }
 
 /**
- * Finds all solutions for this [Board].
+ * This extension function is purely for convenience. It calls the [Solver.solve] function.
  *
  * @return A [Sequence] of all solutions for this [Board].
  */
-fun Board.solutionSequence() = Solver.findAllSolutionsFor(this)
+fun Board.getSolutions() = Solver.solve(this)

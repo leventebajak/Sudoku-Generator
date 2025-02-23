@@ -1,36 +1,73 @@
 package com.leventebajak.dlx
 
 /**
+ * Alias for a [List] of [Node]s.
+ */
+private typealias Solution = List<Node>
+
+/**
  * An implementation of Donald Knuth's [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X),
  * using [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links).
  *
  * Based on the paper [Solving Sudoku efficiently with Dancing Links](https://www.kth.se/social/files/58861771f276547fe1dbf8d1/HLaestanderMHarrysson_dkand14.pdf)
  * by Hjalmar Laestander and Mattias Harrysson.
  *
- * @param matrix the [Matrix] representing the problem
- * @param clueRows the rows of the [Matrix] that must be included in the solution
+ * @param matrix The [Matrix] representing the problem
+ * @param clueRows The rows of the [Matrix] that must be included in the solution
  *
- * @property header the header of the internal structure (the root of the circular doubly-linked list)
- * @property columnHeaders the [Column] headers of the internal structure
- * @property clues the [Node]s that must be included in the solution
+ * @property header The header of the internal structure (the root of the circular doubly-linked list)
+ * @property columnHeaders The [Column] headers of the internal structure
+ * @property clues The [Node]s that must be included in the solution
  */
-open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
+class DLX private constructor(matrix: Matrix, clueRows: List<Int>) {
+    companion object {
+        /**
+         * Finds all solutions to the given [matrix].
+         *
+         * @param matrix the [Matrix] representing the problem
+         * @param clueRows the rows of the [Matrix] that must be included in the solution
+         * @return a [Sequence] of solutions where each solution is a [Matrix]
+         */
+        fun run(matrix: Matrix, clueRows: List<Int> = listOf()): Sequence<Matrix> {
+            val dlx = DLX(matrix, clueRows)
+            return dlx.search().map { it.toMatrix(matrix.columns) }
+        }
+
+        /**
+         * Converting a [Solution] to a [Matrix].
+         *
+         * @param columns the number of columns in the [Matrix]
+         * @return a [Matrix] representing the solution.
+         */
+        private fun Solution.toMatrix(columns: Int) = Matrix(this.map { node ->
+            MutableList(columns) { false }.apply {
+                this[node.column.id] = true
+                var j = node.right
+                while (j !== node) {
+                    this[j.column.id] = true
+                    j = j.right
+                }
+            }
+        })
+    }
+
     private val header = Column(-1)
-    private val columnHeaders = Array(matrix.columns) { Column(it) }
     private val clues = mutableListOf<Node>()
+    private val columnHeaders: Array<Column> = Array(matrix.columns) {
+        val columnHeader = Column(it)
+        columnHeader.left = header.left
+        columnHeader.right = header
+        columnHeader.column = header
+        header.left.right = columnHeader
+        header.left = columnHeader
+        header.size++
+        columnHeader
+    }
 
     /**
      * Initializing the internal structure.
      */
     init {
-        for (columnHeader in columnHeaders) {
-            columnHeader.left = header.left
-            columnHeader.right = header
-            columnHeader.column = header
-            header.left.right = columnHeader
-            header.left = columnHeader
-            header.size++
-        }
         val remainingClueRows = clueRows.toMutableList()
         for ((index, row) in matrix.withIndex()) {
             var prev: Node? = null
@@ -117,40 +154,6 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
         column.uncover()
     }
 
-
-    /**
-     * Finding the first [n] solutions.
-     *
-     * @param n the number of solutions to find
-     * @return a [Sequence] of [Matrices][Matrix]
-     */
-    fun findNSolutions(n: Int) = findAllSolutions().take(n)
-
-    /**
-     * Finding all solutions.
-     *
-     * @return a [Sequence] of [Matrices][Matrix]
-     */
-    fun findAllSolutions() = search().map { it.toMatrix() }
-
-    /**
-     * Converting a [Solution] to a [Matrix].
-     *
-     * @return a [Matrix] representing the solution.
-     */
-    private fun Solution.toMatrix() = Matrix(
-        this.map { node ->
-            MutableList(columnHeaders.size) { false }.apply {
-                this[node.column.id] = true
-                var j = node.right
-                while (j !== node) {
-                    this[j.column.id] = true
-                    j = j.right
-                }
-            }
-        }
-    )
-
     /**
      * Choosing the [Column] with the minimum number of [Node]s to minimize the branching factor.
      *
@@ -172,8 +175,3 @@ open class DLX(matrix: Matrix, clueRows: List<Int> = listOf()) {
         return column
     }
 }
-
-/**
- * Alias for a [List] of [Node]s.
- */
-private typealias Solution = List<Node>

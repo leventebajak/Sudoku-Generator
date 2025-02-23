@@ -1,8 +1,8 @@
 package com.leventebajak.sudoku
 
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Test for the [Solver] class.
@@ -22,7 +22,7 @@ class SolverTest {
                 703018000
             """.toBoard()
 
-        val solutions = board.solutionSequence().toList()
+        val solutions = board.getSolutions().toList()
 
         assertEquals(1, solutions.size)
 
@@ -38,9 +38,7 @@ class SolverTest {
                 763418259
             """.toBoard()
 
-        for (row in 0..8)
-            for (col in 0..8)
-                assertEquals(expectedSolution[row, col], solutions[0][row, col])
+        assertEquals(expectedSolution, solutions.first())
     }
 
     @Test
@@ -57,9 +55,7 @@ class SolverTest {
                 008050040
             """.toBoard()
 
-        val solutions = board.solutionSequence().toList()
-
-        assertEquals(2, solutions.size)
+        val solutions = board.getSolutions().toSet()
 
         val expectedSolutions = arrayOf(
             """
@@ -72,7 +68,7 @@ class SolverTest {
                 142739586
                 536481972
                 978256143
-            """.toBoard(),
+            """,
             """
                 314576829
                 726398451
@@ -83,22 +79,10 @@ class SolverTest {
                 142839576
                 537461982
                 968752143
-            """.toBoard()
-        )
+            """
+        ).map { it.toBoard() }.toSet()
 
-        var match = true
-        var matchOpposite = true
-        for (row in 0..8)
-            for (col in 0..8) {
-                match = match
-                        && expectedSolutions[0][row, col] == solutions[0][row, col]
-                        && expectedSolutions[1][row, col] == solutions[1][row, col]
-                matchOpposite = matchOpposite
-                        && expectedSolutions[0][row, col] == solutions[1][row, col]
-                        && expectedSolutions[1][row, col] == solutions[0][row, col]
-            }
-
-        assertTrue(match.xor(matchOpposite))
+        assertEquals(expectedSolutions, solutions)
     }
 
     @Test
@@ -115,8 +99,8 @@ class SolverTest {
                 703018000
             """.toBoard()
 
-        val solutions = board.solutionSequence().toList()
+        val solutions = board.getSolutions()
 
-        assertEquals(0, solutions.size)
+        assertTrue { solutions.none() }
     }
 }

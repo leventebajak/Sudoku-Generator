@@ -4,13 +4,11 @@ fun main() {
     val difficulty = Difficulty.entries.random()
     println("Difficulty: $difficulty")
 
-    val sudoku = Sudoku.generate(difficulty)
+    val puzzle = Puzzle(difficulty)
 
     println("Clues:")
-    sudoku.clues.print()
+    println(puzzle.clues)
 
-    for ((index, solution) in sudoku.solutions.withIndex()) {
-        println("Solution ${index + 1} of ${sudoku.solutions.size}:")
-        solution.print()
-    }
+    println("Solution:")
+    println(puzzle.solution)
 }

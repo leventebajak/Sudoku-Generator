@@ -3,6 +3,11 @@
 package com.leventebajak.dlx
 
 /**
+ * Alias for a [List] of [Boolean]s.
+ */
+typealias Row = List<Boolean>
+
+/**
  * A matrix of binary values.
  *
  * @property columns The number of columns in the matrix.
@@ -32,7 +37,7 @@ class Matrix(private val data: List<Row>) : Iterable<Row> by data {
 }
 
 /**
- * Converts a multiline [String] to a [Matrix].
+ * Converts a multiline [String] to a [Matrix], where every line represents a row.
  *
  * @return A [Matrix] of [Boolean]s.
  */
@@ -45,11 +50,6 @@ fun String.toMatrix() = Matrix(this.trimIndent().lines().map { line ->
         }
     }
 })
-
-/**
- * Alias for a [List] of [Boolean]s.
- */
-typealias Row = List<Boolean>
 
 /**
  * Gets the index of the next true value in the [Row] starting from [fromIndex].

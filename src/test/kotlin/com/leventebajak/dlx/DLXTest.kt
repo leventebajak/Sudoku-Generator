@@ -18,15 +18,15 @@ class DLXTest {
                 0001101
             """.toMatrix()
 
-        val dlx = DLX(matrix)
-        val solutions = dlx.findAllSolutions().toList()
+        val solutions = DLX.run(matrix).toList()
 
         val expectedSolution = """
                 1001000
                 0010110
                 0100001
             """.toMatrix()
+
         assertEquals(1, solutions.size)
-        assertEquals(expectedSolution, solutions[0])
+        assertEquals(expectedSolution, solutions.first())
     }
 }

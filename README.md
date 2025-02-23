@@ -1,96 +1,45 @@
-# Sudoku - Console
+# Sudoku Generator
 
 ## Description
 
 This is a sudoku solver and generator package written in Kotlin, that uses Donald Knuth's
 [Algorithm X](https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X) to solve the puzzles. The algorithm is implemented
-using [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links).
+using [Dancing Links](https://en.wikipedia.org/wiki/Dancing_Links), based on the paper [Solving Sudoku efficiently with Dancing Links](https://www.kth.se/social/files/58861771f276547fe1dbf8d1/HLaestanderMHarrysson_dkand14.pdf) 
+by Hjalmar Laestander and Mattias Harrysson.
 
-It can find all solutions to a given puzzle, or just the first one. It can also generate new puzzles with unique
-solutions.
+It can find **all** solutions to a given puzzle, or a number of desired solutions.
+It can also generate new puzzles with unique solutions.
 
 ## Usage
 
-The usage of this package is demonstrated in the [`playground.ipynb`](./src/notebooks/playground.ipynb) notebook.
+The usage of this package is demonstrated with the following examples:
 
 ### Generating a puzzle
 
 ```kotlin
-val sudoku = Sudoku.generate(Difficulty.EASY)
+val difficulty = Difficulty.entries.random()
+println("Difficulty: $difficulty")
+
+val puzzle = Puzzle(difficulty)
+
 println("Clues:")
-sudoku.clues.print()
+print(puzzle.clues)
 
-for ((index, solution) in sudoku.solutions.withIndex()) {
-    println("Solution ${index + 1} of ${sudoku.solutions.size}:")
-    solution.print()
-}
+println("Solution:")
+print(puzzle.solution)
 ```
 
-**Output**:
-
-```
-Clues:
-┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
-┃ 8 │ 0 │ 0 ┃ 7 │ 9 │ 0 ┃ 0 │ 5 │ 0 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 0 │ 7 │ 6 ┃ 5 │ 0 │ 1 ┃ 0 │ 0 │ 0 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 0 │ 1 │ 0 ┃ 8 │ 4 │ 3 ┃ 7 │ 6 │ 0 ┃
-┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
-┃ 0 │ 2 │ 7 ┃ 6 │ 8 │ 0 ┃ 0 │ 4 │ 5 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 0 │ 5 │ 0 ┃ 0 │ 0 │ 2 ┃ 6 │ 9 │ 8 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 6 │ 9 │ 0 ┃ 3 │ 0 │ 4 ┃ 0 │ 0 │ 7 ┃
-┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
-┃ 9 │ 8 │ 0 ┃ 0 │ 6 │ 0 ┃ 5 │ 0 │ 1 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 2 │ 0 │ 0 ┃ 9 │ 1 │ 8 ┃ 0 │ 0 │ 0 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 0 │ 6 │ 0 ┃ 0 │ 0 │ 5 ┃ 8 │ 2 │ 9 ┃
-┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
-Solution 1 of 1:
-┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
-┃ 8 │ 4 │ 2 ┃ 7 │ 9 │ 6 ┃ 1 │ 5 │ 3 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 3 │ 7 │ 6 ┃ 5 │ 2 │ 1 ┃ 9 │ 8 │ 4 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 5 │ 1 │ 9 ┃ 8 │ 4 │ 3 ┃ 7 │ 6 │ 2 ┃
-┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
-┃ 1 │ 2 │ 7 ┃ 6 │ 8 │ 9 ┃ 3 │ 4 │ 5 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 4 │ 5 │ 3 ┃ 1 │ 7 │ 2 ┃ 6 │ 9 │ 8 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 6 │ 9 │ 8 ┃ 3 │ 5 │ 4 ┃ 2 │ 1 │ 7 ┃
-┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
-┃ 9 │ 8 │ 4 ┃ 2 │ 6 │ 7 ┃ 5 │ 3 │ 1 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 2 │ 3 │ 5 ┃ 9 │ 1 │ 8 ┃ 4 │ 7 │ 6 ┃
-┃───┼───┼───┃───┼───┼───┃───┼───┼───┃
-┃ 7 │ 6 │ 1 ┃ 4 │ 3 │ 5 ┃ 8 │ 2 │ 9 ┃
-┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
-```
-
-### Solving a puzzle
+### Solving a sudoku board
 
 ```kotlin
-val clues = """
-        004500009
-        720000050
-        000104300
-        003000000
-        490007000
-        000043208
-        002030006
-        500000902
-        008050040
-    """.toBoard()
+val clues = "004500009 720000050 000104300 003000000 490007000 000043208 002030006 500000902 008050040".toBoard()
+// The string is filtered for digits and can be in one line or multiple lines.
 
-val solutions = clues.solutionSequence()
+val solutions = clues.getSolutions()
 
-for ((index, solution) in solutions.withIndex()) {
+solutions.forEachIndexed { index: Int, solution: Board ->
     println("Solution ${index + 1}:")
-    solution.print()
+    println(solution.toString())
 }
 ```
 

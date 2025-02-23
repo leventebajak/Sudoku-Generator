@@ -1,23 +1,24 @@
 package com.leventebajak.sudoku
 
 /**
- * Generates [Sudoku] boards with unique solutions.
+ * A Sudoku puzzle with clues and solutions.
+ *
+ * @property clues The [Board] with the clues and empty cells.
+ * @property solution The [Board] with the solution.
+ * @param difficulty The [Difficulty] of the puzzle, which determines the number of clues.
  */
-object Generator {
-    /**
-     * Creates a Sudoku board with a given [difficulty].
-     *
-     * @param difficulty The [Difficulty] of the board.
-     * @return A [Sudoku] with the given [difficulty].
-     */
-    fun generate(difficulty: Difficulty): Sudoku {
+class Puzzle(difficulty: Difficulty) {
+    val clues: Board
+    val solution: Board
+
+    init {
         start@ while (true) {
             val solution = getFilledBoard()
             val clues = solution.clone()
 
             var clueCount = 81
 
-            val remainingIndices = (0..<81).toMutableSet()
+            val remainingIndices = (0..<clueCount).toMutableSet()
 
             val triedIndices = mutableSetOf<Int>()
 
@@ -28,9 +29,9 @@ object Generator {
 
                 val index = remainingIndices.random().also { remainingIndices.remove(it) }
                 val removedValue = clues[index]
-                clues[index] = Board.EMPTY_CELL
+                clues[index] = Board.EMPTY
 
-                val solutions = Solver.findNSolutionsFor(clues, 2).size
+                val solutions = Solver.solve(clues, 2).size
                 if (solutions != 1) {
                     // If the number of solutions is no longer 1, put the value back.
                     clues[index] = removedValue
@@ -43,7 +44,9 @@ object Generator {
                 clueCount--
             }
 
-            return Sudoku(clues, listOf(solution))
+            this.clues = clues
+            this.solution = solution
+            break
         }
     }
 
@@ -60,5 +63,5 @@ object Generator {
                 this[box * 3 + row, box * 3 + row] = numbers[row]
             }
         }
-    }.let { Solver.findNSolutionsFor(it, 1).first() }
+    }.let { Solver.solve(it, 1).first() }
 }
